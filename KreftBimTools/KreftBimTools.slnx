@@ -1,0 +1,50 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Debug R25" />
+    <BuildType Name="Debug R26" />
+    <BuildType Name="Debug R27" />
+    <BuildType Name="Release" />
+    <BuildType Name="Release R25" />
+    <BuildType Name="Release R26" />
+    <BuildType Name="Release R27" />
+  </Configurations>
+  <Folder Name="/resources/" />
+  <Folder Name="/resources/addins/">
+    <File Path="resources/addins/KreftBimTools.2025.addin" />
+    <File Path="resources/addins/KreftBimTools.2026.addin" />
+    <File Path="resources/addins/KreftBimTools.2027.addin" />
+  </Folder>
+  <Folder Name="/resources/webui/" />
+  <Folder Name="/src/" />
+  <Folder Name="/src/KreftBimTools.Core/">
+    <Project Path="src/KreftBimTools.Core/KreftBimTools.Core.csproj">
+      <Platform Solution="Debug R25|*" Project="x64" />
+      <Platform Solution="Debug R26|*" Project="x64" />
+      <Platform Solution="Debug R27|*" Project="x64" />
+      <Platform Solution="Release R25|*" Project="x64" />
+      <Platform Solution="Release R26|*" Project="x64" />
+      <Platform Solution="Release R27|*" Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/src/KreftBimTools.Revit/">
+    <Project Path="src/KreftBimTools.Revit/KreftBimTools.Revit.csproj">
+      <Platform Solution="Debug R25|*" Project="x64" />
+      <Platform Solution="Debug R26|*" Project="x64" />
+      <Platform Solution="Debug R27|*" Project="x64" />
+      <Platform Solution="Release R25|*" Project="x64" />
+      <Platform Solution="Release R26|*" Project="x64" />
+      <Platform Solution="Release R27|*" Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/src/KreftBimTools.UI/">
+    <Project Path="src/KreftBimTools.UI/KreftBimTools.UI.csproj">
+      <Platform Solution="Debug R25|*" Project="x64" />
+      <Platform Solution="Debug R26|*" Project="x64" />
+      <Platform Solution="Debug R27|*" Project="x64" />
+      <Platform Solution="Release R25|*" Project="x64" />
+      <Platform Solution="Release R26|*" Project="x64" />
+      <Platform Solution="Release R27|*" Project="x64" />
+    </Project>
+  </Folder>
+</Solution>

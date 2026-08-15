@@ -1,0 +1,15 @@
+﻿# Build outputs
+bin/
+obj/
+dist/
+
+# Visual Studio
+.vs/
+*.user
+
+# Inno Setup
+Output/
+
+# OS
+Thumbs.db
+.DS_Store

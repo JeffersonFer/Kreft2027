@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+	<AddIn Type="Application">
+		<Name>KreftBimTools 2026</Name>
+		<Assembly>C:\ProgramData\Kreft\BimTools\DLLs\2026\KreftBimTools.Revit.dll</Assembly>
+		<FullClassName>KreftBimTools.Revit.Application.App</FullClassName>
+		<ClientId>385409E5-B12A-4E89-B131-9E4A6C32E261</ClientId>
+		<VendorId>Jefferson Fernando Santana</VendorId>
+		<VendorDescription>Engenheiro Civil e Desenvolvedor BIM</VendorDescription>
+	</AddIn>
+</RevitAddIns>
