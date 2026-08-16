@@ -11,9 +11,13 @@ public class NotasDaVersaoCommand : IExternalCommand
         TaskDialog.Show(
             "KreftBimTools - Notas da Versão",
             "Versão 1.0.0\n\n" +
-            "• Estrutura inicial do plugin criada\n" +
+            "• Estrutura inicial do plugin (Core, Revit, UI)\n" +
             "• Suporte a Revit 2025, 2026 e 2027\n" +
-            "• Instalador automatizado para as 3 versões"
+            "• Instalador automatizado com detecção de versão\n" +
+            "• Ribbon: abas K-Alvenaria e K-Concreto\n" +
+            "• Comando: Notas da Versão\n" +
+            "• Comando: Agrupar Paredes (seleção múltipla de paredes estruturais)\n" +
+            "• Arquitetura de detecção por proximidade (BoundingBox) para Blocos"
         );
 
         return Result.Succeeded;

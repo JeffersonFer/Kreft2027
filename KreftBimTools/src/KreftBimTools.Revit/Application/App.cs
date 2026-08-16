@@ -8,11 +8,30 @@ public class App : IExternalApplication
 {
     public Result OnStartup(UIControlledApplication application)
     {
-        CreateRibbonTab(application, "K-Alvenaria");
-        CreateRibbonTab(application, "K-Concreto");
+        try
+        {
+            CreateRibbonTab(application, "K-Alvenaria");
+            CreateRibbonTab(application, "K-Concreto");
 
-        CreateNotasDaVersaoButton(application, "K-Alvenaria");
-        CreateNotasDaVersaoButton(application, "K-Concreto");
+            CreateButton(application, "K-Alvenaria", "Geral", "NotasDaVersaoButton",
+                "Notas da\nVersão", "KreftBimTools.Revit.Commands.NotasDaVersaoCommand",
+                "Exibe as notas da versão atual do KreftBimTools",
+                "NotasDaVersao32.png", "NotasDaVersao16.png");
+
+            CreateButton(application, "K-Concreto", "Geral", "NotasDaVersaoButton",
+                "Notas da\nVersão", "KreftBimTools.Revit.Commands.NotasDaVersaoCommand",
+                "Exibe as notas da versão atual do KreftBimTools",
+                "NotasDaVersao32.png", "NotasDaVersao16.png");
+
+            CreateButton(application, "K-Alvenaria", "Paredes", "AgruparParedesButton",
+                "Agrupar\nElementos", "KreftBimTools.Revit.Commands.AgruparParedesCommand",
+                "Agrupa elementos de alvenaria estrutural relacionados a uma parede",
+                "AgruparParedes32.png", "AgruparParedes16.png");
+        }
+        catch (System.Exception ex)
+        {
+            TaskDialog.Show("KreftBimTools - Erro no OnStartup", ex.ToString());
+        }
 
         return Result.Succeeded;
     }
@@ -34,22 +53,43 @@ public class App : IExternalApplication
         }
     }
 
-    private static void CreateNotasDaVersaoButton(UIControlledApplication application, string tabName)
+    private static void CreateButton(
+        UIControlledApplication application,
+        string tabName,
+        string panelName,
+        string buttonName,
+        string buttonText,
+        string commandClassName,
+        string toolTip,
+        string? largeImageFile = null,
+        string? smallImageFile = null)
     {
-        var panel = application.CreateRibbonPanel(tabName, "Geral");
+        var panel = GetOrCreatePanel(application, tabName, panelName);
 
         var buttonData = new PushButtonData(
-            "NotasDaVersaoButton",
-            "Notas da\nVersão",
+            buttonName,
+            buttonText,
             Assembly.GetExecutingAssembly().Location,
-            "KreftBimTools.Revit.Commands.NotasDaVersaoCommand"
+            commandClassName
         );
 
-        buttonData.LargeImage = LoadImage("NotasDaVersao32.png");
-        buttonData.Image = LoadImage("NotasDaVersao16.png");
-        buttonData.ToolTip = "Exibe as notas da versão atual do KreftBimTools";
+        buttonData.ToolTip = toolTip;
+
+        if (largeImageFile is not null)
+            buttonData.LargeImage = LoadImage(largeImageFile);
+
+        if (smallImageFile is not null)
+            buttonData.Image = LoadImage(smallImageFile);
 
         panel.AddItem(buttonData);
+    }
+
+    private static RibbonPanel GetOrCreatePanel(UIControlledApplication application, string tabName, string panelName)
+    {
+        var panels = application.GetRibbonPanels(tabName);
+        var panelExistente = panels.FirstOrDefault(p => p.Name == panelName);
+
+        return panelExistente ?? application.CreateRibbonPanel(tabName, panelName);
     }
 
     private static BitmapImage LoadImage(string fileName)

@@ -49,6 +49,14 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>Resources\NotasDaVersao16.png</Link>
 		</None>
+		<None Include="..\..\resources\icons\ribbon\AgruparParedes32.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>Resources\AgruparParedes32.png</Link>
+		</None>
+		<None Include="..\..\resources\icons\ribbon\AgruparParedes16.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>Resources\AgruparParedes16.png</Link>
+		</None>
 	</ItemGroup>
 
 </Project>

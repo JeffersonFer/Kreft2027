@@ -1,0 +1,13 @@
+﻿KreftBimTools - Antes de Instalar
+
+Você está prestes a instalar o KreftBimTools versão 1.0.0.
+
+Novidades desta versão:
+- Estrutura inicial do plugin (Core, Revit, UI)
+- Suporte a Revit 2025, 2026 e 2027
+- Ribbon: abas K-Alvenaria e K-Concreto
+- Comando "Notas da Versão"
+- Comando "Agrupar Paredes" (seleção múltipla de paredes estruturais)
+- Base da arquitetura de detecção por proximidade (Blocos)
+
+Recomendamos fechar o Revit antes de continuar.

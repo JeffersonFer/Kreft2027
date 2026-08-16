@@ -14,6 +14,8 @@ PrivilegesRequired=admin
 SetupIconFile=..\..\resources\icons\kreftAddinIcon.ico
 UninstallDisplayIcon={app}\kreftAddinIcon.ico
 WizardImageFile=..\..\resources\icons\KreftBimToolsBanner.bmp
+InfoBeforeFile=..\..\resources\notas-antes.txt
+InfoAfterFile=..\..\resources\notas-depois.txt
 
 [Files]
 ; Revit 2025 - DLLs (ProgramData)
