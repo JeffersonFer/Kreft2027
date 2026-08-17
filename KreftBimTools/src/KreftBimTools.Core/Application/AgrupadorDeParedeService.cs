@@ -1,6 +1,5 @@
 ﻿using KreftBimTools.Core.Deteccao;
 using KreftBimTools.Core.Domain;
-using KreftBimTools.Core.Application;
 
 namespace KreftBimTools.Core.Application
 {

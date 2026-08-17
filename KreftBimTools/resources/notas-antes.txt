@@ -1,6 +1,6 @@
 ﻿KreftBimTools - Antes de Instalar
 
-Você está prestes a instalar o KreftBimTools versão 1.0.0.
+Você está prestes a instalar o KreftBimTools versão 0.1.0.
 
 Novidades desta versão:
 - Estrutura inicial do plugin (Core, Revit, UI)
@@ -8,6 +8,10 @@ Novidades desta versão:
 - Ribbon: abas K-Alvenaria e K-Concreto
 - Comando "Notas da Versão"
 - Comando "Agrupar Paredes" (seleção múltipla de paredes estruturais)
-- Base da arquitetura de detecção por proximidade (Blocos)
+- Detecção automática de Portas e Janelas relacionadas à parede
+- Pipeline de detecção por proximidade: BoundingBox + Solid/Origin + Orientação (Blocos)
+
+Atenção: esta é uma versão em desenvolvimento ativo. A detecção
+de Graute Horizontal ainda está em ajuste.
 
 Recomendamos fechar o Revit antes de continuar.

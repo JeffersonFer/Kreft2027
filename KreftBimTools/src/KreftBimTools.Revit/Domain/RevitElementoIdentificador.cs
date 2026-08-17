@@ -60,5 +60,22 @@ namespace KreftBimTools.Revit.Domain
 
         public static bool IsBloco(Element element)
             => ObterTipo(element) == TipoElementoAlvenaria.Bloco;
+
+        public static OrientacaoElemento? ObterOrientacao(Element element)
+        {
+            if(element is Wall wall)
+            {
+                var orientacao = wall.Orientation;
+                return new OrientacaoElemento(XYZ.BasisZ.CrossProduct(orientacao), orientacao, XYZ.BasisZ);
+            }
+
+            if(element is FamilyInstance familyInstance)
+            {
+                var tranform = familyInstance.GetTotalTransform();
+                return new OrientacaoElemento(tranform.BasisX, tranform.BasisY, tranform.BasisZ);
+            }
+
+            return null;
+        }
     }
 }

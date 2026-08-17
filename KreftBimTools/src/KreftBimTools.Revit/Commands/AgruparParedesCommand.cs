@@ -4,6 +4,7 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using KreftBimTools.Core.Domain;
 using KreftBimTools.Revit.Domain;
+using KreftBimTools.Revit.Domain.Deteccao;
 using KreftBimTools.Revit.Domain.SelectionFilters;
 
 namespace KreftBimTools.Revit.Commands
@@ -44,11 +45,11 @@ namespace KreftBimTools.Revit.Commands
             var factory = new RevitElementoFactory();
             var paredes = new List<IElementoAlvenaria>();
 
-            foreach (var referencia in paredesSelecionadas)
+            foreach (var paredeRefe in paredesSelecionadas)
             {
                 try
                 {
-                    var element = doc.GetElement(referencia);
+                    var element = doc.GetElement(paredeRefe);
                     var entidade = factory.Criar(element);
 
                     if (entidade != null)
@@ -56,8 +57,27 @@ namespace KreftBimTools.Revit.Commands
                 }
                 catch (Exception ex)
                 {
-                    erros.Add($"Elemento {referencia.ElementId}: {ex.Message}");
+                    erros.Add($"Elemento {paredeRefe.ElementId}: {ex.Message}");
                 }
+            }
+
+            using (TransactionGroup tg = new TransactionGroup(doc, "Agrupador de paredes"))
+            {
+                tg.Start();
+
+                foreach (var parede in paredes)
+                {
+                    try
+                    {
+                        AgruparParedes(doc, parede);
+                    }
+                    catch(Exception ex)
+                    {
+                        erros.Add($"Elemento {parede.Identificador}: {ex.Message}");
+                    }
+                }
+
+                tg.Assimilate();
             }
 
             var resumo = $"{paredes.Count} parede(s) processada(s) com sucesso.";
@@ -68,6 +88,53 @@ namespace KreftBimTools.Revit.Commands
             TaskDialog.Show(nomeDoCommand, resumo);
 
             return Result.Succeeded;
+        }
+
+        private void AgruparParedes(Document doc, IElementoAlvenaria parede)
+        {
+            List<ElementId> elementIdsParaAgrupar = new List<ElementId>();
+
+            var paredeId = new ElementId(long.Parse(parede.Identificador));
+            Element paredeElement = doc.GetElement(paredeId);
+
+            List<ElementId> dependentIds = new List<ElementId>();
+
+            if (paredeElement is Wall wall)
+            {
+                // Cria filtro para categorias de portas e janelas
+                ElementMulticategoryFilter filter = new ElementMulticategoryFilter(
+                    new List<BuiltInCategory>
+                    {
+                             BuiltInCategory.OST_Doors,
+                             BuiltInCategory.OST_Windows
+                    }
+                );
+
+                // Obtém os IDs dos elementos dependentes
+                dependentIds = wall.GetDependentElements(filter).ToList();
+            }
+
+            elementIdsParaAgrupar.Add(paredeId);
+            elementIdsParaAgrupar.AddRange(dependentIds);
+
+            var deteccaoBlocosNaParedeBB = new DeteccaoBoundingBox(doc, BuiltInCategory.OST_GenericModel, "Bloco").Detectar(parede);
+            var deteccaoBlocosNaParedePontosDentroDoSolido = new DeteccaoSolidOrigin(doc).Refinar(parede, deteccaoBlocosNaParedeBB);
+            var deteccaoBlocosNaParedePorOrientacao = new DeteccaoOrientacaoVetores(doc).Refinar(parede, deteccaoBlocosNaParedePontosDentroDoSolido);
+            var blocosId = deteccaoBlocosNaParedePorOrientacao.Select(b => new ElementId(long.Parse(b.Identificador)));
+
+            elementIdsParaAgrupar.AddRange(blocosId);
+
+            if (elementIdsParaAgrupar.Count > 0)
+            {
+                using (Transaction tx = new Transaction(doc, "Agrupar paredes"))
+                {
+                    tx.Start();
+
+                    doc.Create.NewGroup(elementIdsParaAgrupar);
+
+                    tx.Commit();
+                }
+            }
         }
     }
 }

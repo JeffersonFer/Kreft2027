@@ -4,14 +4,14 @@ using KreftBimTools.Core.Domain;
 
 namespace KreftBimTools.Revit.Domain.Deteccao
 {
-    public class DeteccaoBoundingBoxBoundingBox : IEstrategiaDeteccao
+    public class DeteccaoBoundingBox : IEstrategiaDeteccao
     {
         private readonly Autodesk.Revit.DB.Document _doc;
         private BuiltInCategory _category;
         private string _typeComments;
         private double _tolerancia = 0.1;
 
-        public DeteccaoBoundingBoxBoundingBox(Autodesk.Revit.DB.Document doc,
+        public DeteccaoBoundingBox(Autodesk.Revit.DB.Document doc,
             BuiltInCategory category,
             string typeComments)
         {
@@ -23,7 +23,6 @@ namespace KreftBimTools.Revit.Domain.Deteccao
         public IEnumerable<IElementoAlvenaria> Detectar(IElementoAlvenaria elementoAlvenaria)
         {
             var elementId = new ElementId(long.Parse(elementoAlvenaria.Identificador));
-
             Element elementDetector = _doc.GetElement(elementId);
 
             BoundingBoxXYZ elementDetectorBB = elementDetector.get_BoundingBox(null);
@@ -35,7 +34,7 @@ namespace KreftBimTools.Revit.Domain.Deteccao
             // Filtro espacial: elementos dentro/intersectando a bounding box
             BoundingBoxIntersectsFilter bbFilter = new BoundingBoxIntersectsFilter(outline);
 
-            // Filtro de categoria: apenas Modelos Genéricos
+            // Filtro de categoria
             ElementCategoryFilter categoryFilter =
                 new ElementCategoryFilter(_category);
 
@@ -43,7 +42,7 @@ namespace KreftBimTools.Revit.Domain.Deteccao
             LogicalAndFilter quickFilters =
                 new LogicalAndFilter(bbFilter, categoryFilter);
 
-            // Filtro de parâmetro de tipo: ALL_MODEL_TYPE_COMMENTS == "Bloco"
+            // Filtro de parâmetro de tipo
             ParameterValueProvider pvp =
                 new ParameterValueProvider(
                     new ElementId((long)BuiltInParameter.ALL_MODEL_TYPE_COMMENTS));
