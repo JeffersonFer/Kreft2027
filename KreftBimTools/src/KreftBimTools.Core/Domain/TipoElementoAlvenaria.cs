@@ -9,7 +9,7 @@ namespace KreftBimTools.Core.Domain
         Desconhecido,
         Estrutural,
         Bloco,
-        GrauteVertical,
+        Pilarete,
         GrauteHorizontal,
         Porta,
         Janela,

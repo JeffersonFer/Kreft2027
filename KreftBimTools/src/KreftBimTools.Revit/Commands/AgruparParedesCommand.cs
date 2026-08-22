@@ -117,12 +117,19 @@ namespace KreftBimTools.Revit.Commands
             elementIdsParaAgrupar.Add(paredeId);
             elementIdsParaAgrupar.AddRange(dependentIds);
 
-            var deteccaoBlocosNaParedeBB = new DeteccaoBoundingBox(doc, BuiltInCategory.OST_GenericModel, "Bloco").Detectar(parede);
+            var deteccaoBlocosNaParedeBB = new DeteccaoBoundingBox(doc, TipoElementoAlvenaria.Bloco).Detectar(parede);
             var deteccaoBlocosNaParedePontosDentroDoSolido = new DeteccaoSolidOrigin(doc).Refinar(parede, deteccaoBlocosNaParedeBB);
             var deteccaoBlocosNaParedePorOrientacao = new DeteccaoOrientacaoVetores(doc).Refinar(parede, deteccaoBlocosNaParedePontosDentroDoSolido);
             var blocosId = deteccaoBlocosNaParedePorOrientacao.Select(b => new ElementId(long.Parse(b.Identificador)));
 
             elementIdsParaAgrupar.AddRange(blocosId);
+
+            var deteccaoGrauteHorizontalBB = new DeteccaoParedeGrauteHorizontal(doc).Detectar(parede);
+            var deteccaoGrautesHorizontaisPontosDentroDoSolido = new DeteccaoSolidOrigin(doc).Refinar(parede, deteccaoGrauteHorizontalBB);
+            var deteccaoGrautesHorizontaisNaParedePorOrientacao = new DeteccaoOrientacaoVetores(doc).Refinar(parede, deteccaoGrautesHorizontaisPontosDentroDoSolido);
+            var grautesHorizontaisId = deteccaoGrautesHorizontaisNaParedePorOrientacao.Select(gh => new ElementId(long.Parse(gh.Identificador)));
+
+            elementIdsParaAgrupar.AddRange(grautesHorizontaisId);
 
             if (elementIdsParaAgrupar.Count > 0)
             {

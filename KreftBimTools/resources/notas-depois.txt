@@ -1,13 +1,10 @@
 ﻿KreftBimTools - Instalação Concluída
 
-O KreftBimTools versão 0.1.0 foi instalado com sucesso!
+O KreftBimTools versão 0.2.0 foi instalado com sucesso!
 
-Para usar o plugin, abra o Revit e procure pelas abas 
-"K-Alvenaria" e "K-Concreto" na Ribbon.
-
-Novidades desta versão: comando "Agrupar Paredes", disponível 
-na aba K-Alvenaria, com detecção automática de Blocos, Portas 
-e Janelas relacionados a cada parede selecionada.
+O comando "Agrupar Paredes", na aba K-Alvenaria, agora detecta
+automaticamente Blocos, Grautes Horizontais, Portas e Janelas
+relacionados a cada parede estrutural selecionada.
 
 Em caso de dúvidas ou problemas, entre em contato com o 
 desenvolvedor.

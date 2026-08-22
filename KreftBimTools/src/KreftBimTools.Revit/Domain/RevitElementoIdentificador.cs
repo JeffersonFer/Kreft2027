@@ -9,13 +9,25 @@ namespace KreftBimTools.Revit.Domain
         {
             ["Estrutural"] = TipoElementoAlvenaria.Estrutural,
             ["Bloco"] = TipoElementoAlvenaria.Bloco,
-            ["Graute Vertical"] = TipoElementoAlvenaria.GrauteVertical,
+            ["Pilarete"] = TipoElementoAlvenaria.Pilarete,
             ["Graute Horizontal"] = TipoElementoAlvenaria.GrauteHorizontal,
             ["Porta"] = TipoElementoAlvenaria.Porta,
             ["Janela"] = TipoElementoAlvenaria.Janela,
             ["Viga"] = TipoElementoAlvenaria.Viga,
             ["Pilar"] = TipoElementoAlvenaria.Pilar,
         };
+
+        private static readonly Dictionary<TipoElementoAlvenaria, (BuiltInCategory categoria, string typeComments)> _mapaCriterios = new()
+        {
+            [TipoElementoAlvenaria.Bloco] = (BuiltInCategory.OST_GenericModel, "Bloco"),
+            [TipoElementoAlvenaria.Estrutural] = (BuiltInCategory.OST_Walls, "Estrutural"),
+            [TipoElementoAlvenaria.GrauteHorizontal] = (BuiltInCategory.OST_StructuralFraming, "Graute Horizontal"),
+        };
+
+        public static (BuiltInCategory categoria, string typeComments) ObterCriterio(TipoElementoAlvenaria tipo)
+        {
+            return _mapaCriterios[tipo];
+        }
 
         /// <summary>
         /// Pega o conteúdo parâmetro TypeComments do elemento passado no método
@@ -60,6 +72,9 @@ namespace KreftBimTools.Revit.Domain
 
         public static bool IsBloco(Element element)
             => ObterTipo(element) == TipoElementoAlvenaria.Bloco;
+
+        public static bool IsGrauteHorizontal(Element element)
+            => ObterTipo(element) == TipoElementoAlvenaria.GrauteHorizontal;
 
         public static OrientacaoElemento? ObterOrientacao(Element element)
         {

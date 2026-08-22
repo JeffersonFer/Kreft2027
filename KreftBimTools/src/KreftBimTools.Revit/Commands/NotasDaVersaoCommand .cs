@@ -20,10 +20,10 @@ public class NotasDaVersaoCommand : IExternalCommand
             "• Instalador automatizado com detecção de versão\n" +
             "• Ribbon: abas K-Alvenaria e K-Concreto\n" +
             "• Comando: Notas da Versão\n" +
-            "• Comando: Agrupar Paredes (seleção múltipla de paredes estruturais)\n" +
+            "• Comando: Agrupar Paredes - concluído\n" +
             "• Detecção automática de Portas e Janelas relacionadas à parede\n" +
-            "• Pipeline de detecção por proximidade: BoundingBox + Solid/Origin + Orientação (Blocos)\n" +
-            "• Versão em desenvolvimento ativo - detecção de Graute Horizontal ainda em ajuste"
+            "• Detecção automática de Blocos (BoundingBox + Solid/Origin + Orientação)\n" +
+            "• Detecção automática de Graute Horizontal (BoundingBox + Solid/Origin + Orientação)"
         );
 
         return Result.Succeeded;

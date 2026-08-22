@@ -18,6 +18,9 @@ namespace KreftBimTools.Revit.Domain
             if (RevitElementoIdentificador.IsBloco(element))
                 return new Bloco(element.Id.ToString());
 
+            if (RevitElementoIdentificador.IsGrauteHorizontal(element))
+                return new GrauteHorizontal(element.Id.ToString());
+
             return null;
         }
     }

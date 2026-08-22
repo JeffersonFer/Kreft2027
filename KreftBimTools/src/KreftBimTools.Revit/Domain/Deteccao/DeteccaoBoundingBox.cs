@@ -11,13 +11,10 @@ namespace KreftBimTools.Revit.Domain.Deteccao
         private string _typeComments;
         private double _tolerancia = 0.1;
 
-        public DeteccaoBoundingBox(Autodesk.Revit.DB.Document doc,
-            BuiltInCategory category,
-            string typeComments)
+        public DeteccaoBoundingBox(Document doc, TipoElementoAlvenaria tipoAlvo)
         {
             _doc = doc;
-            _category = category;
-            _typeComments = typeComments;
+            (_category, _typeComments) = RevitElementoIdentificador.ObterCriterio(tipoAlvo);
         }
 
         public IEnumerable<IElementoAlvenaria> Detectar(IElementoAlvenaria elementoAlvenaria)
