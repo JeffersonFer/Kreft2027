@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<Configurations>Debug R25;Debug R26;Debug R27;Release R25;Release R26;Release R27</Configurations>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -9,38 +8,33 @@
 		<UseWPF>true</UseWPF>
 		<Version>0.2.0</Version>
 	</PropertyGroup>
-
 	<PropertyGroup Condition="$(Configuration.Contains('R27'))">
 		<TargetFrameworks>net10.0-windows</TargetFrameworks>
 	</PropertyGroup>
-
 	<PropertyGroup Condition="!$(Configuration.Contains('R27'))">
 		<TargetFrameworks>net8.0-windows</TargetFrameworks>
 	</PropertyGroup>
-
+	<PropertyGroup Condition="$(Configuration.Contains('R25'))">
+		<DefineConstants>$(DefineConstants);REVIT2025</DefineConstants>
+	</PropertyGroup>
 	<ItemGroup Condition="$(Configuration.Contains('R25'))">
 		<PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2025.4.0" />
 		<PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2025.4.0" />
 	</ItemGroup>
-
 	<ItemGroup Condition="$(Configuration.Contains('R26'))">
 		<PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2026.4.10" />
 		<PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2026.4.10" />
 	</ItemGroup>
-
 	<ItemGroup Condition="$(Configuration.Contains('R27'))">
 		<PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2027.2.0" />
 		<PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2027.2.0" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<ProjectReference Include="..\KreftBimTools.Core\KreftBimTools.Core.csproj" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<None Include="..\..\resources\icons\ribbon\NotasDaVersao32.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -59,5 +53,4 @@
 			<Link>Resources\AgruparParedes16.png</Link>
 		</None>
 	</ItemGroup>
-
 </Project>
