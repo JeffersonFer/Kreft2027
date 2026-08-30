@@ -21,9 +21,10 @@ public class NotasDaVersaoCommand : IExternalCommand
             "• Ribbon: abas K-Alvenaria e K-Concreto\n" +
             "• Comando: Notas da Versão\n" +
             "• Comando: Agrupar Paredes - concluído\n" +
+            "• Comando: Armador de Paredes - cintas, vergas e contravergas em aço horizontal\n" +
+            "• Comando: Compatibilizador de Blocos - ajusta blocos atravessados por portas/janelas\n" +
             "• Detecção automática de Portas e Janelas relacionadas à parede\n" +
-            "• Detecção automática de Blocos (BoundingBox + Solid/Origin + Orientação)\n" +
-            "• Detecção automática de Graute Horizontal (BoundingBox + Solid/Origin + Orientação)"
+            "• Detecção automática de Blocos e Graute Horizontal (BoundingBox + Solid/Origin + Orientação)"
         );
 
         return Result.Succeeded;

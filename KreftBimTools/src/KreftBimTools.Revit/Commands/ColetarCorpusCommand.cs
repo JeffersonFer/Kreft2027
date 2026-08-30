@@ -91,7 +91,6 @@ namespace KreftBimTools.Revit.Commands
         }
 #endif
             }
-
             var pontoInicial = curvaAlvo.GetEndPoint(0);
             var pontoFinal = curvaAlvo.GetEndPoint(1);
 

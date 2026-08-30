@@ -27,6 +27,16 @@ public class App : IExternalApplication
                 "Agrupar\nElementos", "KreftBimTools.Revit.Commands.AgruparParedesCommand",
                 "Agrupa elementos de alvenaria estrutural relacionados a uma parede",
                 "AgruparParedes32.png", "AgruparParedes16.png");
+
+            CreateButton(application, "K-Alvenaria", "Aço", "ArmadorDeParedesButton",
+                "Aço\nHorizontal", "KreftBimTools.Revit.Commands.ArmadorDeParedes",
+                "Calcula e cria automaticamente o aço horizontal de cintas, vergas e contravergas",
+                "ArmadorDeParedes32.png", "ArmadorDeParedes16.png");
+
+            CreateButton(application, "K-Alvenaria", "Blocos", "CompatibilizadorBlocosButton",
+                "Compatibilizar", "KreftBimTools.Revit.Commands.CompatibilizadorBlocos",
+                "Verifica aberturas nas paredes e compatibiliza os blocos que ficam parcialmente atravessados",
+                "AgruparParedes32.png", "AgruparParedes16.png");
         }
         catch (System.Exception ex)
         {

@@ -1,11 +1,13 @@
 ﻿KreftBimTools - Antes de Instalar
 
-Você está prestes a instalar o KreftBimTools versão 0.2.0.
+Você está prestes a instalar o KreftBimTools versão 0.3.0.
 
 Novidades desta versão:
-- Comando "Agrupar Paredes" concluído
-- Detecção automática de Blocos relacionados à parede
-- Detecção automática de Graute Horizontal relacionado à parede
-- Detecção automática de Portas e Janelas relacionadas à parede
+- Comando "Armador de Paredes" - calcula e cria automaticamente
+  o aço horizontal de cintas, vergas e contravergas
+- Comando "Compatibilizador de Blocos" - ajusta automaticamente
+  blocos atravessados por portas e janelas
+- Comando "Agrupar Paredes" concluído (Blocos, Graute Horizontal,
+  Portas e Janelas)
 
 Recomendamos fechar o Revit antes de continuar.
