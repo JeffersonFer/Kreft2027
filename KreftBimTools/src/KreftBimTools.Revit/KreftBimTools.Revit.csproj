@@ -60,5 +60,13 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>Resources\ArmadorDeParedes16.png</Link>
 		</None>
+		<None Include="..\..\resources\icons\ribbon\ColetarCorpus32.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>Resources\ColetarCorpus32.png</Link>
+		</None>
+		<None Include="..\..\resources\icons\ribbon\ColetarCorpus16.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>Resources\ColetarCorpus16.png</Link>
+		</None>
 	</ItemGroup>
 </Project>

@@ -37,6 +37,11 @@ public class App : IExternalApplication
                 "Compatibilizar", "KreftBimTools.Revit.Commands.CompatibilizadorBlocos",
                 "Verifica aberturas nas paredes e compatibiliza os blocos que ficam parcialmente atravessados",
                 "AgruparParedes32.png", "AgruparParedes16.png");
+
+            CreateButton(application, "K-Alvenaria", "ML", "ColetarCorpusButton",
+                "Coletar\nCorpus", "KreftBimTools.Revit.Commands.ColetarCorpusCommand",
+                "Coleta dados de modulação de blocos em trechos de parede, para análise e treinamento de IA",
+                "ColetarCorpus32.png", "ColetarCorpus16.png");
         }
         catch (System.Exception ex)
         {
