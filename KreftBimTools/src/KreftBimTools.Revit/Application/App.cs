@@ -28,19 +28,19 @@ public class App : IExternalApplication
                 "Agrupa elementos de alvenaria estrutural relacionados a uma parede",
                 "AgruparParedes32.png", "AgruparParedes16.png");
 
+            CreateButton(application, "K-Alvenaria", "Blocos", "CompatibilizadorBlocosButton",
+                "Compatibilizar", "KreftBimTools.Revit.Commands.CompatibilizadorBlocos",
+                "Verifica aberturas nas paredes e compatibiliza os blocos que ficam parcialmente atravessados",
+                "CompatibilizarBlocos32.png", "CompatibilizarBlocos16.png");
+
             CreateButton(application, "K-Alvenaria", "Aço", "ArmadorDeParedesButton",
                 "Aço\nHorizontal", "KreftBimTools.Revit.Commands.ArmadorDeParedes",
                 "Calcula e cria automaticamente o aço horizontal de cintas, vergas e contravergas",
                 "ArmadorDeParedes32.png", "ArmadorDeParedes16.png");
 
-            CreateButton(application, "K-Alvenaria", "Blocos", "CompatibilizadorBlocosButton",
-                "Compatibilizar", "KreftBimTools.Revit.Commands.CompatibilizadorBlocos",
-                "Verifica aberturas nas paredes e compatibiliza os blocos que ficam parcialmente atravessados",
-                "AgruparParedes32.png", "AgruparParedes16.png");
-
-            CreateButton(application, "K-Alvenaria", "ML", "ColetarCorpusButton",
+            CreateButton(application, "K-Alvenaria", "Machine Learning", "ColetarCorpusButton",
                 "Coletar\nCorpus", "KreftBimTools.Revit.Commands.ColetarCorpusCommand",
-                "Coleta dados de modulação de blocos em trechos de parede, para análise e treinamento de IA",
+                "Coleta dados de modulação de blocos em trechos de parede, para análise e aprendizagem de máquina",
                 "ColetarCorpus32.png", "ColetarCorpus16.png");
         }
         catch (System.Exception ex)

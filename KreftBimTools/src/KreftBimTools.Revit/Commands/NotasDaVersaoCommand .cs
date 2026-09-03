@@ -23,8 +23,9 @@ public class NotasDaVersaoCommand : IExternalCommand
             "• Comando: Agrupar Paredes - concluído\n" +
             "• Comando: Armador de Paredes - cintas, vergas e contravergas em aço horizontal\n" +
             "• Comando: Compatibilizador de Blocos - ajusta blocos atravessados por portas/janelas\n" +
-            "• Detecção automática de Portas e Janelas relacionadas à parede\n" +
-            "• Detecção automática de Blocos e Graute Horizontal (BoundingBox + Solid/Origin + Orientação)"
+            "• Comando: Coletor de Corpus - coleta dados de modulação de alvenaria para futura IA\n" +
+            "• Correção: Armador de Paredes agora funciona corretamente em paredes com blocos agrupados\n" +
+            "• Correção: REBAIXOA/REBAIXOB do aço horizontal agora são calculados para cintas, vergas e contravergas"
         );
 
         return Result.Succeeded;

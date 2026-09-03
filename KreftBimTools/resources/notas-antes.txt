@@ -1,13 +1,12 @@
 ﻿KreftBimTools - Antes de Instalar
 
-Você está prestes a instalar o KreftBimTools versão 0.3.0.
+Você está prestes a instalar o KreftBimTools versão 0.3.1.
 
-Novidades desta versão:
-- Comando "Armador de Paredes" - calcula e cria automaticamente
-  o aço horizontal de cintas, vergas e contravergas
-- Comando "Compatibilizador de Blocos" - ajusta automaticamente
-  blocos atravessados por portas e janelas
-- Comando "Agrupar Paredes" concluído (Blocos, Graute Horizontal,
-  Portas e Janelas)
+Correções desta versão:
+- Armador de Paredes: não trava mais / desagrupa paredes com blocos
+  agrupados. O aço é criado normalmente, mas a marcação de canaleta
+  fica a cargo do usuário nesses casos.
+- Armador de Paredes: REBAIXOA/REBAIXOB agora é calculado corretamente
+  para cintas, vergas e contravergas (antes só funcionava para cintas).
 
 Recomendamos fechar o Revit antes de continuar.

@@ -19,13 +19,14 @@ namespace KreftBimTools.Revit.Commands
         // Dado leve produzido na fase de leitura (fora da transação) e consumido na fase de escrita (dentro da transação).
         private readonly struct InstrucaoAcoHorizontal
         {
-            public InstrucaoAcoHorizontal(Parede parede, XYZ vetorDirecaoExterna, XYZ posicao, double comprimento, ICollection<Wall> paredesIntersectantes)
+            public InstrucaoAcoHorizontal(Parede parede, XYZ vetorDirecaoExterna, XYZ posicao, double comprimento, ICollection<Wall> paredesIntersectantes, double rebaixo)
             {
                 Parede = parede;
                 VetorDirecaoExterna = vetorDirecaoExterna;
                 Posicao = posicao;
                 Comprimento = comprimento;
                 ParedesIntersectantes = paredesIntersectantes;
+                Rebaixo = rebaixo;
             }
 
             public Parede Parede { get; }
@@ -33,23 +34,26 @@ namespace KreftBimTools.Revit.Commands
             public XYZ Posicao { get; }
             public double Comprimento { get; }
             public ICollection<Wall> ParedesIntersectantes { get; }
+            public double Rebaixo { get; }
         }
 
         // Dado leve para vergas/contravergas — sem dobras, sem paredes intersectantes.
         private readonly struct InstrucaoVerga
         {
-            public InstrucaoVerga(Parede parede, XYZ vetorDirecaoExterna, XYZ posicao, double comprimento)
+            public InstrucaoVerga(Parede parede, XYZ vetorDirecaoExterna, XYZ posicao, double comprimento, double rebaixo)
             {
                 Parede = parede;
                 VetorDirecaoExterna = vetorDirecaoExterna;
                 Posicao = posicao;
                 Comprimento = comprimento;
+                Rebaixo = rebaixo;
             }
 
             public Parede Parede { get; }
             public XYZ VetorDirecaoExterna { get; }
             public XYZ Posicao { get; }
             public double Comprimento { get; }
+            public double Rebaixo { get; }
         }
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -133,17 +137,6 @@ namespace KreftBimTools.Revit.Commands
                 Element blocoDetalhamentoElement = doc.GetElement(referenciaBlocoDetalhamento);
                 double cotaZDetalhamento = ((LocationPoint)blocoDetalhamentoElement.Location).Point.Z;
 
-                // TODO: avaliar se warm-up dos lazies (WallGeometrySolid, WallBlocosFamilyInstances, WallBlocos) é necessário aqui.
-                // Removido/comentado porque nenhum dos três resultados era reaproveitado depois. Se reintroduzir, lembrar
-                // que com 100+ paredes / ~30 mil blocos isso deve ser feito parede-a-parede com dispose imediato (ver FASE 1 abaixo),
-                // não como uma passagem separada que mantém tudo vivo em memória.
-                //foreach (var parede in paredes)
-                //{
-                //    var solids = parede.WallGeometrySolid;
-                //    var familyInstances = parede.WallBlocosFamilyInstances;
-                //    var blocos = parede.WallBlocos;
-                //}
-
                 // ============================================================
                 // FASE 1 — LEITURA E CÁLCULO GEOMÉTRICO (fora da transação)
                 // Processa parede por parede. Toda geometria pesada (Solid, GeometryElement)
@@ -192,6 +185,11 @@ namespace KreftBimTools.Revit.Commands
                         {
                             var centrosEComprimentos = ObterCentrosEComprimentos(linhaComoSolido, solidoUnido);
 
+                            // Coleta de blocos depende só da cinta (linhaComoSolido) — chamado uma única vez,
+                            // reaproveitado tanto para o cálculo do REBAIXOA/B quanto para SP_CANALETA na Fase 2.
+                            List<FamilyInstance> blocosDestaCinta = ObterBlocosQueIntersectam(doc, linhaComoSolido, parede.VetorDirecaoParede);
+                            double rebaixo = blocosDestaCinta.Count > 0 ? ObterMenorRebaixo(blocosDestaCinta[0]) : 0;
+
                             foreach (var centroEComprimento in centrosEComprimentos)
                             {
                                 XYZ posicao = new XYZ(
@@ -208,11 +206,10 @@ namespace KreftBimTools.Revit.Commands
                                     vetorDirecaoExternaParede,
                                     posicao,
                                     comprimentoTruncadoCm,
-                                    paredesConectadas));
+                                    paredesConectadas,
+                                    rebaixo));
                             }
 
-                            // Coleta de blocos depende só da cinta (linhaComoSolido), não de haver aço válido — roda sempre.
-                            List<FamilyInstance> blocosDestaCinta = ObterBlocosQueIntersectam(doc, linhaComoSolido, parede.VetorDirecaoParede);
                             todosBlocosQueIntersectamCintas.AddRange(blocosDestaCinta);
                         }
                         catch (Exception ex)
@@ -270,8 +267,9 @@ namespace KreftBimTools.Revit.Commands
                                     porta.PortaTransform.Origin.Z + porta.Altura);
 
                                 XYZ centroVerga = ObterCentroDosBlocos(blocos, parede.VetorDirecaoParede, centroVao);
+                                double rebaixoVerga = ObterMenorRebaixo(blocos[0]);
 
-                                instrucoesVergas.Add(new InstrucaoVerga(parede, vetorDirecaoExternaParede, centroVerga, comprimentoArmadura));
+                                instrucoesVergas.Add(new InstrucaoVerga(parede, vetorDirecaoExternaParede, centroVerga, comprimentoArmadura, rebaixoVerga));
                                 todosBlocosQueIntersectamCintas.AddRange(blocos);
                             }
                         }
@@ -307,8 +305,9 @@ namespace KreftBimTools.Revit.Commands
                                     janela.JanelaTransform.Origin.Z + janela.Peitoril + janela.Altura);
 
                                 XYZ centroVerga = ObterCentroDosBlocos(blocos, parede.VetorDirecaoParede, centroVao);
+                                double rebaixoVerga = ObterMenorRebaixo(blocos[0]);
 
-                                instrucoesVergas.Add(new InstrucaoVerga(parede, vetorDirecaoExternaParede, centroVerga, comprimentoArmadura));
+                                instrucoesVergas.Add(new InstrucaoVerga(parede, vetorDirecaoExternaParede, centroVerga, comprimentoArmadura, rebaixoVerga));
                                 todosBlocosQueIntersectamCintas.AddRange(blocos);
                             }
                         }
@@ -336,8 +335,9 @@ namespace KreftBimTools.Revit.Commands
                                     janela.JanelaTransform.Origin.Z + janela.Peitoril - UnitUtils.ConvertToInternalUnits(19, UnitTypeId.Centimeters));
 
                                 XYZ centroContraverga = ObterCentroDosBlocos(blocosCV, parede.VetorDirecaoParede, centroVaoCV);
+                                double rebaixoContraverga = ObterMenorRebaixo(blocosCV[0]);
 
-                                instrucoesVergas.Add(new InstrucaoVerga(parede, vetorDirecaoExternaParede, centroContraverga, comprimentoArmaduraCV));
+                                instrucoesVergas.Add(new InstrucaoVerga(parede, vetorDirecaoExternaParede, centroContraverga, comprimentoArmaduraCV, rebaixoContraverga));
                                 todosBlocosQueIntersectamCintas.AddRange(blocosCV);
                             }
                         }
@@ -391,6 +391,8 @@ namespace KreftBimTools.Revit.Commands
                                 instrucao.Comprimento,
                                 instrucao.ParedesIntersectantes);
 
+                                SetarRebaixo(aco, instrucao.Rebaixo, _errosArmacaoCintas, instrucao.Parede.Id);
+
                                 acosDestaParede.Add((aco, instrucao.Posicao));
                             }
                             catch (Exception ex)
@@ -410,6 +412,8 @@ namespace KreftBimTools.Revit.Commands
                                 instrucaoVerga.Posicao,
                                 instrucaoVerga.Comprimento);
 
+                                SetarRebaixo(aco, instrucaoVerga.Rebaixo, _errosArmacaoVergas, parede.Id);
+
                                 acosDestaParede.Add((aco, instrucaoVerga.Posicao));
                             }
                             catch (Exception ex)
@@ -423,6 +427,9 @@ namespace KreftBimTools.Revit.Commands
 
                     foreach (var blocoFamilyInstance in todosBlocosQueIntersectamCintas)
                     {
+                        if (blocoFamilyInstance.GroupId != ElementId.InvalidElementId)
+                            continue; // bloco pertence a um Group - deixa a cargo do usuário marcar canaleta manualmente
+
                         Parameter spCanaleta = blocoFamilyInstance.LookupParameter("SP_CANALETA");
 
                         if (spCanaleta.AsInteger() == 1)
@@ -464,6 +471,43 @@ namespace KreftBimTools.Revit.Commands
                 TaskDialog.Show("Error", ex.Message);
                 return Result.Failed;
             }
+        }
+
+        /// <summary>
+        /// Retorna o menor valor entre SP_H_CANALETA, SP_H_CANALETA2 e SP_H_BLOCO do bloco,
+        /// usado para calcular REBAIXOA/REBAIXOB do aço horizontal associado a ele.
+        /// Reaproveitável por qualquer tipo de instrução (cinta, verga, contraverga, ou
+        /// futuros comandos que criem aço horizontal a partir de blocos selecionados/detectados).
+        /// </summary>
+        private double ObterMenorRebaixo(FamilyInstance bloco)
+        {
+            double h1 = bloco.LookupParameter("SP_H_CANALETA")?.AsDouble() ?? double.MaxValue;
+            double h2 = bloco.LookupParameter("SP_H_CANALETA2")?.AsDouble() ?? double.MaxValue;
+            double h3 = bloco.LookupParameter("SP_H_BLOCO")?.AsDouble() ?? double.MaxValue;
+
+            return Math.Min(h1, Math.Min(h2, h3));
+        }
+
+        /// <summary>
+        /// Seta REBAIXOA/REBAIXOB na instância de aço horizontal já criada (deve ser chamado
+        /// depois da criação, dentro da transação). Reaproveitável por cintas, vergas,
+        /// contravergas, e qualquer comando futuro que crie aço horizontal a partir de blocos
+        /// detectados (ex: instanciação por seleção de 2 blocos). Loga em vez de lançar exceção
+        /// caso os parâmetros não existam na família, para não interromper o processamento em lote.
+        /// </summary>
+        private void SetarRebaixo(FamilyInstance aco, double rebaixo, List<string> logErros, ElementId contextoParaLog)
+        {
+            Parameter paramA = aco.LookupParameter("REBAIXOA");
+            Parameter paramB = aco.LookupParameter("REBAIXOB");
+
+            if (paramA == null || paramB == null)
+            {
+                logErros.Add($"Elemento {contextoParaLog}: REBAIXOA/B não encontrado no aço criado.");
+                return;
+            }
+
+            paramA.Set(rebaixo);
+            paramB.Set(rebaixo);
         }
 
         /// <summary>
@@ -951,12 +995,6 @@ namespace KreftBimTools.Revit.Commands
 
             BoundingBoxIntersectsFilter bbFilter = new BoundingBoxIntersectsFilter(outline);
 
-            // Passo 2: candidatos via BoundingBox (quick filter)
-            // TODO: se quiser restringir só a paredes "Estrutural", adicionar aqui:
-            // .WherePasses(new ElementParameterFilter(
-            //     new FilterStringRule(
-            //         new ParameterValueProvider(new ElementId(BuiltInParameter.ALL_MODEL_TYPE_COMMENTS)),
-            //         new FilterStringEquals(), "Estrutural")))
             IList<Wall> candidatos = new FilteredElementCollector(document)
                 .OfCategory(BuiltInCategory.OST_Walls)
                 .WhereElementIsNotElementType()
@@ -968,8 +1006,6 @@ namespace KreftBimTools.Revit.Commands
             XYZ alvoStart = targetCurve.GetEndPoint(0);
             XYZ alvoEnd = targetCurve.GetEndPoint(1);
 
-            // Passo 3: valida se algum endpoint de uma das duas curvas
-            // está sobre a curva da outra parede, nos dois sentidos
             return candidatos
                 .Where(w =>
                 {
@@ -981,14 +1017,12 @@ namespace KreftBimTools.Revit.Commands
                     XYZ candidataStart = candidataCurve.GetEndPoint(0);
                     XYZ candidataEnd = candidataCurve.GetEndPoint(1);
 
-                    // Sentido 1: pontas da candidata tocando a curva da alvo (ex.: T normal)
                     IntersectionResult projCandidataStart = targetCurve.Project(candidataStart);
                     IntersectionResult projCandidataEnd = targetCurve.Project(candidataEnd);
                     bool candidataTocaAlvo =
                         (projCandidataStart != null && projCandidataStart.Distance <= tolerance) ||
                         (projCandidataEnd != null && projCandidataEnd.Distance <= tolerance);
 
-                    // Sentido 2: pontas da alvo tocando a curva da candidata (T invertido)
                     IntersectionResult projAlvoStart = candidataCurve.Project(alvoStart);
                     IntersectionResult projAlvoEnd = candidataCurve.Project(alvoEnd);
                     bool alvoTocaCandidata =
@@ -1025,7 +1059,6 @@ namespace KreftBimTools.Revit.Commands
             XYZ pontaA = origem - direcaoEixo * compAValue;
             XYZ pontaB = origem + direcaoEixo * compBValue;
 
-            // Ponta A — testa dir1, se não achar testa dir2, para na primeira que encontrar
             if (HaParedeNaDirecao(pontaA, perpendicular, paredesIntersectantes))
             {
                 DOBRA_35_A.Set(0);
@@ -1047,7 +1080,6 @@ namespace KreftBimTools.Revit.Commands
                 DOBRA_10_A.Set(1);
             }
 
-            // Ponta B — mesma lógica
             if (HaParedeNaDirecao(pontaB, perpendicular, paredesIntersectantes))
             {
                 DOBRA_35_B.Set(0);
@@ -1139,12 +1171,10 @@ namespace KreftBimTools.Revit.Commands
         private readonly Document _doc;
         private readonly BuiltInCategory _category;
 
-        // Lazy — caros
         private readonly Lazy<IEnumerable<Solid>> _solids;
         private readonly Lazy<List<FamilyInstance>> _familyInstances;
         private readonly Lazy<List<Bloco>> _blocos;
 
-        // Props baratas — inicializadas no construtor
         public ElementId Id => _id;
         public List<FamilyInstance> Portas { get; private set; }
         public List<FamilyInstance> Janelas { get; private set; }
@@ -1153,7 +1183,6 @@ namespace KreftBimTools.Revit.Commands
         public Outline WallOutline { get; private set; }
         public XYZ VetorDirecaoParede { get; private set; }
 
-        // Props caras — lazy
         public IEnumerable<Solid> WallGeometrySolid => _solids.Value;
         public List<FamilyInstance> WallBlocosFamilyInstances => _familyInstances.Value;
         public List<Bloco> WallBlocos => _blocos.Value;
@@ -1166,11 +1195,9 @@ namespace KreftBimTools.Revit.Commands
             _doc = doc;
             _category = category;
 
-            // Baratos — executa já
             InitializeBoundingBox();
             InitializeDirecao();
 
-            // Caros — registra a receita, executa só quando acessar
             _solids = new Lazy<IEnumerable<Solid>>(
                 () => _wallElement.get_Geometry(new Options()).Cast<Solid>()
             );
@@ -1179,7 +1206,6 @@ namespace KreftBimTools.Revit.Commands
                 () => WallBlocosFamilyInstances.Select(b => new Bloco(b)).ToList()
             );
 
-            // Pega portas e janelas hospedadas na parede
             Portas = InitializePortasOuJanelas(BuiltInCategory.OST_Doors);
             Janelas = InitializePortasOuJanelas(BuiltInCategory.OST_Windows);
         }
@@ -1414,9 +1440,9 @@ namespace KreftBimTools.Revit.Commands
         public double BlocoLargura { get; set; }
         public double BlocoComprimento { get; set; }
         public double BlocoAltura { get; set; }
-        public Septo? Septo1 { get; set; } //positivo em relação ao Hand
-        public Septo? Septo2 { get; set; } //negativo em relação ao Hand
-        public Septo? Septo3 { get; set; } //no centro do bloco
+        public Septo? Septo1 { get; set; }
+        public Septo? Septo2 { get; set; }
+        public Septo? Septo3 { get; set; }
         public Bloco(Autodesk.Revit.DB.FamilyInstance blocoFamilyInstance)
         {
             BlocoFamilyInstance = blocoFamilyInstance;
@@ -1424,159 +1450,6 @@ namespace KreftBimTools.Revit.Commands
             BlocoLargura = UnitUtils.ConvertFromInternalUnits(blocoFamilyInstance.Symbol.LookupParameter("Largura").AsDouble(), UnitTypeId.Centimeters);
             BlocoComprimento = UnitUtils.ConvertFromInternalUnits(blocoFamilyInstance.Symbol.LookupParameter("Comprimento").AsDouble(), UnitTypeId.Centimeters);
             BlocoAltura = UnitUtils.ConvertFromInternalUnits(blocoFamilyInstance.LookupParameter("SP_H_BLOCO").AsDouble(), UnitTypeId.Centimeters);
-        }
-
-        public void CriarSeptosTemporarios(Document doc, FamilySymbol? detailSymbol)
-        {
-            XYZ origin = BlocoTransform.Origin;  // ponto de origem
-            XYZ basisX = BlocoTransform.BasisX;  // eixo X local (direção "hand")
-            XYZ basisY = BlocoTransform.BasisY;  // eixo Y local (direção "facing")
-            XYZ basisZ = BlocoTransform.BasisZ;  // eixo Z local (normal ao plano)
-
-            double offsetPositiveXValor = 10;
-            double offsetNegativeXValor = 10;
-
-            if (BlocoComprimento == 34)
-            {
-                offsetPositiveXValor = 7.5;
-            }
-
-            else if (BlocoComprimento == 54)
-            {
-                offsetPositiveXValor = 17.5;
-                offsetNegativeXValor = 17.5;
-            }
-
-            double offsetPositiveX = UnitUtils.ConvertToInternalUnits(offsetPositiveXValor, UnitTypeId.Centimeters);
-            double offsetNegativeX = UnitUtils.ConvertToInternalUnits(offsetNegativeXValor, UnitTypeId.Centimeters);
-            XYZ point1 = origin + basisX * offsetPositiveX;
-            XYZ point2 = origin - basisX * offsetNegativeX;
-            XYZ point3 = origin;
-
-            if (detailSymbol == null)
-                throw new Exception("Nenhum FamilySymbol de item de detalhe encontrado.");
-
-            // Obter a view ativa
-            View activeView = doc.ActiveView;
-
-            // Calcular o ângulo de rotação a partir do vetor Hand
-            // O ângulo é em relação ao eixo X global (1, 0, 0)
-            XYZ xAxis = XYZ.BasisX;
-            double angle = Math.Atan2(basisX.Y, basisX.X);
-
-            #region Transaction para criar septos temporários
-            if (BlocoComprimento > 9)
-            {
-                using (Transaction tx1 = new Transaction(doc, "Criar itens de detalhe"))
-                {
-                    tx1.Start();
-
-                    // Desativa regeneração automática durante o loop
-                    tx1.SetFailureHandlingOptions(
-                        tx1.GetFailureHandlingOptions()
-                         .SetDelayedMiniWarnings(true));
-
-                    // Ativar o symbol se necessário
-                    if (!detailSymbol.IsActive)
-                        detailSymbol.Activate();
-
-                    // Criar instância 1
-                    FamilyInstance detail1 = doc.Create.NewFamilyInstance(
-                        point1, detailSymbol, activeView);
-
-                    // Criar instância 2
-                    FamilyInstance detail2 = doc.Create.NewFamilyInstance(
-                        point2, detailSymbol, activeView);
-
-                    // Criar instância 3 (no centro do bloco)
-                    FamilyInstance detail3 = doc.Create.NewFamilyInstance(
-                        point3, detailSymbol, activeView);
-
-                    // Aplicar rotação para alinhar com o Hand da família original
-                    // Rotacionar em torno do eixo Z passando pelo ponto de inserção
-                    if (Math.Abs(angle) > 1e-9)
-                    {
-                        Line axis1 = Line.CreateBound(point1, point1 + XYZ.BasisZ);
-                        Line axis2 = Line.CreateBound(point2, point2 + XYZ.BasisZ);
-                        Line axis3 = Line.CreateBound(point3, point3 + XYZ.BasisZ);
-                        ElementTransformUtils.RotateElement(doc, detail1.Id, axis1, angle);
-                        ElementTransformUtils.RotateElement(doc, detail2.Id, axis2, angle);
-                        ElementTransformUtils.RotateElement(doc, detail3.Id, axis3, angle);
-                    }
-
-                    // Linhas de projeção e corte em vermelho
-                    OverrideGraphicSettings ogs = new OverrideGraphicSettings();
-                    Color red = new Color(255, 0, 0);
-
-                    ogs.SetProjectionLineColor(red);
-                    ogs.SetCutLineColor(red);
-
-                    // Espessura de linha (valor entre 1 e 16, conforme tabela de pesos do Revit)
-                    ogs.SetProjectionLineWeight(5); // linhas de projeção
-                    ogs.SetCutLineWeight(5);        // linhas de corte
-
-                    activeView.SetElementOverrides(detail1.Id, ogs);
-                    activeView.SetElementOverrides(detail2.Id, ogs);
-                    activeView.SetElementOverrides(detail3.Id, ogs);
-
-                    // Preenchimento em vermelho (se aplicável)
-                    FillPatternElement solidFill = new FilteredElementCollector(doc)
-                        .OfClass(typeof(FillPatternElement))
-                        .Cast<FillPatternElement>()
-                        .FirstOrDefault(fp => fp.GetFillPattern().IsSolidFill);
-
-                    if (solidFill != null)
-                    {
-                        ogs.SetSurfaceForegroundPatternId(solidFill.Id);
-                        ogs.SetSurfaceForegroundPatternColor(red);
-                        ogs.SetCutForegroundPatternId(solidFill.Id);
-                        ogs.SetCutForegroundPatternColor(red);
-                    }
-
-                    activeView.SetElementOverrides(detail1.Id, ogs);
-                    activeView.SetElementOverrides(detail2.Id, ogs);
-                    activeView.SetElementOverrides(detail3.Id, ogs);
-
-                    if (BlocoComprimento == 19 && BlocoLargura == 14)
-                    {
-                        doc.Delete(detail1.Id);
-                        doc.Delete(detail2.Id);
-                    }
-
-                    else if (BlocoComprimento == 19 && BlocoLargura == 19)
-                    {
-                        doc.Delete(detail1.Id);
-                        doc.Delete(detail2.Id);
-                        detail3.LookupParameter("TIPO").Set(4);
-                    }
-
-                    else if (BlocoComprimento == 34)
-                    {
-                        doc.Delete(detail3.Id);
-                        detail2.LookupParameter("TIPO").Set(2);
-                    }
-
-                    else if (BlocoComprimento == 39 && BlocoLargura == 14)
-                    {
-                        doc.Delete(detail3.Id);
-                    }
-
-                    else if (BlocoComprimento == 39 && BlocoLargura == 19)
-                    {
-                        doc.Delete(detail3.Id);
-                        detail1.LookupParameter("TIPO").Set(4);
-                        detail2.LookupParameter("TIPO").Set(4);
-                    }
-
-                    else if (BlocoComprimento == 54)
-                    {
-                        detail3.LookupParameter("TIPO").Set(2);
-                    }
-
-                    tx1.Commit();
-                }
-            }
-            #endregion
         }
 
         public Solid CriarSolidoBloco()

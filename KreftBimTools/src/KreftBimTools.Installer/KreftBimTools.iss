@@ -1,12 +1,12 @@
 [Setup]
 AppId={{21958C75-22E1-4A2E-814C-D7CE06FA2978}
 AppName=KreftBimTools
-AppVersion=0.3.0
+AppVersion=0.3.1
 AppPublisher=Jefferson Fernando Santana
 DefaultDirName={autopf}\Kreft\BimTools
 DisableProgramGroupPage=yes
 OutputDir=..\..\dist\Installer
-OutputBaseFilename=KreftBimTools-Setup-0.3.0
+OutputBaseFilename=KreftBimTools-Setup-0.3.1
 Compression=lzma
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64compatible
